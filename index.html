@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DUAL SWITCH">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>DUAL SWITCH</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1220;--panel:#151f30;--panel2:#1b2940;--text:#f4f7fb;--muted:#a8b4c7;--green:#22c782;--blue:#6da8ff;--line:#2b3a52;--red:#ff7777}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(ellipse at top,#1b2a43 0%,var(--bg) 55%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh;padding:env(safe-area-inset-top) 18px calc(24px + env(safe-area-inset-bottom))}
+    main{max-width:460px;margin:0 auto;padding-top:22px}.brand{text-align:center;font-size:13px;letter-spacing:.22em;color:var(--muted);font-weight:800}.brand strong{color:white}.sub{text-align:center;color:var(--muted);font-size:13px;margin:8px 0 24px}
+    .card{background:linear-gradient(145deg,rgba(28,42,64,.97),rgba(18,28,44,.97));border:1px solid var(--line);border-radius:22px;padding:19px;margin:13px 0;box-shadow:0 12px 35px #0003}
+    h1{font-size:25px;text-align:center;margin:0 0 5px}.hint{font-size:13px;line-height:1.45;color:var(--muted);text-align:center;margin:0}
+    label{display:block;font-size:13px;color:var(--muted);margin:0 0 9px} select{width:100%;appearance:none;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:15px 42px 15px 14px;color:var(--text);font-size:16px}
+    .field{position:relative}.field:after{content:'⌄';position:absolute;right:16px;top:9px;font-size:22px;color:var(--muted);pointer-events:none}
+    .number{font-size:20px;font-weight:750;letter-spacing:.02em;margin-top:7px}.operator{color:var(--muted);font-size:12px;margin-top:3px}
+    button{width:100%;border:0;border-radius:15px;padding:17px 14px;font-size:16px;font-weight:750;cursor:pointer;margin-top:11px;-webkit-tap-highlight-color:transparent}
+    .primary{background:var(--green);color:#062416}.secondary{background:#263750;color:var(--text);border:1px solid #3b506d}.copy{background:transparent;color:var(--blue);border:1px solid #39577e;padding:13px;font-size:14px}
+    .section-title{font-size:14px;font-weight:750;margin-bottom:8px}.step{display:flex;gap:11px;margin:12px 0;color:var(--muted);font-size:13px;line-height:1.45}.step b{display:grid;place-items:center;flex:0 0 24px;height:24px;border-radius:50%;background:#263750;color:white;font-size:12px}
+    .warning{border-color:#735a32;background:linear-gradient(145deg,#302719,#211d19)}.warning .section-title{color:#ffd18a}.warning p{font-size:13px;color:#e4d5bd;line-height:1.5;margin:0}
+    .status{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;margin:15px 6px 0}.toast{min-height:18px;text-align:center;color:var(--green);font-size:13px;margin-top:10px}
+    footer{text-align:center;color:#718097;font-size:11px;line-height:1.5;margin-top:20px}
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand"><strong>DUAL</strong> SWITCH</div>
+  <div class="sub">Переадресация между двумя iPhone</div>
+  <section class="card">
+    <h1>Настройка телефона</h1>
+    <p class="hint">Выбери SIM-карту, установленную в этом iPhone</p>
+    <div style="height:18px"></div>
+    <label for="profile">Оператор этого телефона</label>
+    <div class="field"><select id="profile"><option value="yota">Yota</option><option value="t2">Т-Мобайл</option></select></div>
+    <div style="height:16px"></div>
+    <div class="operator">Номер этого телефона</div>
+    <div class="number" id="currentNumber">Не настроен</div>
+    <div class="operator" style="margin-top:13px">Переадресация будет на</div>
+    <div class="number" id="targetNumber">Не настроен</div>
+    <div class="operator" id="targetOperator">Введи номера ниже</div>
+    <div style="height:18px"></div>
+    <label for="yotaNumber">Номер Yota</label>
+    <input id="yotaNumber" type="tel" inputmode="tel" placeholder="8 9xx xxx-xx-xx" autocomplete="off" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px;color:var(--text);font-size:16px">
+    <div style="height:12px"></div>
+    <label for="t2Number">Номер Т-Мобайл</label>
+    <input id="t2Number" type="tel" inputmode="tel" placeholder="8 9xx xxx-xx-xx" autocomplete="off" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px;color:var(--text);font-size:16px">
+    <button class="copy" id="save">Сохранить номера на этом iPhone</button>
+    <button class="primary" id="enable">ПЕРЕНАПРАВИТЬ ЗВОНКИ</button>
+    <button class="secondary" id="disable">ОТКЛЮЧИТЬ ПЕРЕАДРЕСАЦИЮ</button>
+    <button class="secondary" id="check">Проверить переадресацию</button>
+    <p class="status">Если набор не открылся, введи <code>*#21#</code> вручную в приложении «Телефон» и посмотри ответ оператора.</p>
+    <button class="copy" id="copy">Скопировать USSD-команду</button>
+    <div class="toast" id="toast" aria-live="polite"></div>
+  </section>
+  <section class="card" aria-labelledby="lastActionTitle">
+    <div class="section-title" id="lastActionTitle">Последнее действие</div>
+    <div class="step" id="lastAction" aria-live="polite"></div>
+    <div class="operator">Здесь показана только последняя попытка запуска команды для выбранного профиля. Фактическое состояние переадресации подтверждает оператор.</div>
+  </section>
+  <section class="card warning">
+    <div class="section-title">Важно: не создай замкнутую переадресацию</div>
+    <p>При смене телефона сначала отключи переадресацию на том iPhone, который берёшь с собой, затем включи её на телефоне, который оставляешь. Иначе два номера могут начать перенаправлять звонки друг на друга.</p>
+  </section>
+  <section class="card">
+    <div class="section-title">Как пользоваться</div>
+    <div class="step"><b>1</b><span>На телефоне, который берёшь с собой, нажми «Отключить переадресацию» (если она была включена ранее).</span></div>
+    <div class="step"><b>2</b><span>На телефоне, который оставляешь, нажми «Перенаправить звонки».</span></div>
+    <div class="step"><b>3</b><span>Если iPhone откроет системный набор, подтверди вызов и дождись ответа оператора.</span></div>
+  </section>
+  <p class="status">Приложение передаёт команду в системный набор. Ответ оператора доступен на экране телефона, веб-приложение его не считывает.</p>
+  <footer>DUAL SWITCH · локальное веб-приложение<br>Профиль оператора сохраняется отдельно на каждом iPhone.</footer>
+</main>
+<script>
+  const profile = document.getElementById('profile');
+  const currentNumber = document.getElementById('currentNumber');
+  const targetNumber = document.getElementById('targetNumber');
+  const targetOperator = document.getElementById('targetOperator');
+  const toast = document.getElementById('toast');
+  const yotaInput = document.getElementById('yotaNumber');
+  const t2Input = document.getElementById('t2Number');
+  const lastAction = document.getElementById('lastAction');
+  const actions = {
+    enable: 'Включение переадресации',
+    disable: 'Отключение переадресации',
+    check: 'Проверка переадресации'
+  };
+  const actionDate = new Intl.DateTimeFormat('ru-RU', {dateStyle:'short', timeStyle:'short'});
+  profile.value = localStorage.getItem('dual-switch-profile') === 't2' ? 't2' : 'yota';
+  yotaInput.value = loadNumber('dual-switch-yota');
+  t2Input.value = loadNumber('dual-switch-t2');
+
+  function normalizeNumber(value) {
+    const digits = value.replace(/\D/g, '');
+    return digits.replace(/^[78](\d{10})$/, '8$1');
+  }
+
+  function loadNumber(key) {
+    const saved = localStorage.getItem(key) || '';
+    const number = normalizeNumber(saved);
+    if (/^8\d{10}$/.test(number) && number !== saved) {
+      localStorage.setItem(key, number);
+      return number;
+    }
+    return saved;
+  }
+
+  function data() {
+    const isYota = profile.value === 'yota';
+    return {
+      number: normalizeNumber((isYota ? yotaInput : t2Input).value),
+      target: normalizeNumber((isYota ? t2Input : yotaInput).value),
+      targetName: isYota ? 'Т-Мобайл' : 'Yota'
+    };
+  }
+
+  function actionKey() {
+    return 'dual-switch-last-action-' + profile.value;
+  }
+
+  function renderLastAction() {
+    lastAction.textContent = 'Для этого профиля пока нет попыток запуска.';
+    const saved = localStorage.getItem(actionKey());
+    if (!saved) return;
+    let entry;
+    try { entry = JSON.parse(saved); } catch { return; }
+    if (!entry || !Object.prototype.hasOwnProperty.call(actions, entry.action)) return;
+    const date = new Date(entry.date);
+    if (!Number.isFinite(date.getTime())) return;
+    const destination = entry.target ? 'Номер назначения: ' + entry.target : 'Без номера назначения';
+    lastAction.textContent = actions[entry.action] + ' · ' + actionDate.format(date) + ' · ' + destination;
+  }
+
+  function render() {
+    const d = data();
+    currentNumber.textContent = d.number || 'Не указан';
+    targetNumber.textContent = d.target || 'Не указан';
+    targetOperator.textContent = d.targetName;
+    localStorage.setItem('dual-switch-profile', profile.value);
+    toast.textContent = '';
+    renderLastAction();
+  }
+
+  function save() {
+    const yota = normalizeNumber(yotaInput.value);
+    const t2 = normalizeNumber(t2Input.value);
+    if ((yota && !/^8\d{10}$/.test(yota)) || (t2 && !/^8\d{10}$/.test(t2))
+        || (yotaInput.value.trim() && !yota) || (t2Input.value.trim() && !t2)) {
+      toast.textContent = 'Введи номера из 11 цифр в формате 8XXXXXXXXXX';
+      return;
+    }
+    yotaInput.value = yota;
+    t2Input.value = t2;
+    localStorage.setItem('dual-switch-yota', yota);
+    localStorage.setItem('dual-switch-t2', t2);
+    render();
+    toast.textContent = 'Номера сохранены только на этом устройстве';
+  }
+
+  function dial(code, action, target = null) {
+    const entry = {date: new Date().toISOString(), action, target};
+    localStorage.setItem(actionKey(), JSON.stringify(entry));
+    renderLastAction();
+    toast.textContent = '';
+    window.location.href = 'tel:' + code.replaceAll('#', '%23');
+  }
+
+  document.getElementById('save').addEventListener('click', save);
+  document.getElementById('enable').addEventListener('click', () => {
+    const d = data();
+    if (!/^8\d{10}$/.test(d.number) || !/^8\d{10}$/.test(d.target)) {
+      toast.textContent = 'Введи оба номера в формате 8XXXXXXXXXX и сохрани их';
+      return;
+    }
+    dial('**21*' + d.target + '#', 'enable', d.target);
+  });
+  document.getElementById('disable').addEventListener('click', () => dial('##21#', 'disable'));
+  document.getElementById('check').addEventListener('click', () => dial('*#21#', 'check'));
+  document.getElementById('copy').addEventListener('click', async () => {
+    const d = data();
+    if (!/^8\d{10}$/.test(d.target)) {
+      toast.textContent = 'Введи номер назначения в формате 8XXXXXXXXXX';
+      return;
+    }
+    const code = '**21*' + d.target + '#';
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.textContent = 'Команда скопирована: ' + code;
+    } catch {
+      toast.textContent = 'Команда: ' + code;
+    }
+  });
+  profile.addEventListener('change',render);render();
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
